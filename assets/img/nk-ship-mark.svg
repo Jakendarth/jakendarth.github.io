@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 48">
+  <title>NK ship mark</title>
+  <path d="M6 27V10l14 17V10M27 10v17m15-17L27 20m5-4 11 11" fill="none" stroke="#182d32" stroke-width="3.2" stroke-linecap="square" stroke-linejoin="round"/>
+  <path d="M4 31h44l-5 8c-11 5-23 5-34 0z" fill="#185c61"/>
+  <path d="M13 35h26" fill="none" stroke="#d9e9e7" stroke-width="1.5" stroke-linecap="round"/>
+  <circle cx="37" cy="5" r="2" fill="#b57852"/>
+  <path d="M32 7a7 7 0 0 1 10 0" fill="none" stroke="#b57852" stroke-width="1.2" stroke-linecap="round"/>
+</svg>

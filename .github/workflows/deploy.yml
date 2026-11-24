@@ -1,42 +1,54 @@
-name: deploy
+name: Refresh content and deploy
 
 on:
   push:
-    branches:
-      - master
-      - main
-  pull_request:
-    branches:
-      - master
-      - main
+    branches: [master, main]
+  schedule:
+    - cron: '37 7 * * 1' # Every Monday at 07:37 UTC
+  workflow_dispatch:
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-    - name: Setup Ruby
-      uses: ruby/setup-ruby@v1
-      with:
-        ruby-version: '3.0.2'
-        bundler-cache: true
-    - name: Install deps
-      run: |
-        npm install -g mermaid.cli
-    - name: Setup deploy options
-      id: setup
-      run: |
-        git config --global user.name "GitHub Action"
-        git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-        if [[ ${GITHUB_REF} = refs/pull/*/merge ]]; then # pull request
-          echo "::set-output name=SRC_BRANCH::${GITHUB_HEAD_REF}"
-          echo "::set-output name=NO_PUSH::--no-push"
-        elif [[ ${GITHUB_REF} = refs/heads/* ]]; then # branch, e.g. master, source etc
-          echo "::set-output name=SRC_BRANCH::${GITHUB_REF#refs/heads/}"
-        fi
-        echo "::set-output name=DEPLOY_BRANCH::gh-pages"
-    - name: Deploy website 
-      run:  yes | bash bin/deploy --verbose ${{ steps.setup.outputs.NO_PUSH }}
-                    --src ${{ steps.setup.outputs.SRC_BRANCH }} 
-                    --deploy ${{ steps.setup.outputs.DEPLOY_BRANCH }} 
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Refresh updates, writing, and projects
+        run: python3 scripts/refresh_content.py
+      - name: Keep the weekly source snapshot
+        if: github.event_name == 'schedule'
+        run: |
+          git add index.html
+          if ! git diff --cached --quiet; then
+            git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'Refresh public content [skip ci]'
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi
+      - name: Build static site
+        run: python3 scripts/build_site.py
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -9,3 +9,7 @@ _site
 Gemfile.lock
 vendor
 
+
+# Generated GitHub Pages artifact
+dist/
+__pycache__/
