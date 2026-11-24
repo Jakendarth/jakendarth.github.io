@@ -1,6 +1,6 @@
 # Nikos Kougiatsos — personal website
 
-Source for [jakendarth.github.io](https://jakendarth.github.io). The homepage is static HTML and CSS. The weekly workflow refreshes three sections: Updates, Selected work, and Recent writing.
+Source for [jakendarth.github.io](https://jakendarth.github.io). The homepage is static HTML and CSS. The workflow refreshes Updates, Selected work, and Recent writing weekly, and Suggested reading daily.
 
 ## Preview
 
@@ -8,13 +8,15 @@ Run `python3 -m http.server 8000` in this directory and open `http://localhost:8
 
 ## Weekly refresh
 
-`.github/workflows/deploy.yml` refreshes and deploys the site every Monday at 07:37 UTC. It also runs on pushes to `master` or `main`, and can be started manually with **Run workflow** in GitHub Actions. The scheduled run commits its checked snapshot to the default branch. In **Settings → Pages**, select **GitHub Actions** as the publishing source when activating the workflow.
+`.github/workflows/deploy.yml` refreshes the research and project sections every Monday at 07:37 UTC. Suggested reading refreshes at 06:17 UTC on the other six days and during the Monday run. The workflow also runs on pushes to `master` or `main`, and can be started manually with **Run workflow** in GitHub Actions. Scheduled runs commit their checked snapshot to the default branch. GitHub Actions is the Pages publishing source.
 
 `scripts/refresh_content.py` reads OpenAlex works filtered by ORCID `0000-0001-9518-9114` and shows the latest four verified papers in Recent writing. It selects recent, substantive, maritime-related public repositories owned by `Jakendarth` for Selected work. Each project displays its latest release tag, tag, or a clearly labeled commit revision. Empty repositories and forks are excluded, so MAR(AI) will appear only after code is published there. Updates combine recent papers, releases, and editorial features in `assets/data/featured_updates.json`.
 
 If a public feed is unavailable, the existing content and checked date remain in place. News features outside the structured feeds need to be added to `assets/data/featured_updates.json`. GitHub may disable scheduled workflows after 60 days without repository activity, for example if weekly runs fail to commit for an extended period.
 
-Run `python3 scripts/refresh_content.py` for a local refresh, then `python3 scripts/build_site.py` to build the deployment artifact in `dist/`. The build also creates redirects from `/projects/`, `/publications/`, and `/blog/` to the homepage.
+`scripts/refresh_news.py` reads public RSS feeds from Smart Maritime Network and Offshore Energy. It keeps recent article links whose headlines match maritime autonomy, AI, safety, or cleaner propulsion themes, favors topic variety, and shows the publisher and date. If no current matches are available, the existing Suggested reading card remains in place. These are automated reading suggestions, not endorsements.
+
+Run `python3 scripts/refresh_content.py` and `python3 scripts/refresh_news.py` for a local refresh, then `python3 scripts/build_site.py` to build the deployment artifact in `dist/`. The build also creates redirects from `/projects/`, `/publications/`, and `/blog/` to the homepage.
 
 ## Edit content
 
